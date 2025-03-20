@@ -1,93 +1,79 @@
-# main.py
-from sumar import sumar
-from resta import restar
-from multiplicacion import multiplicar
-from dividir import dividir
-from suma_avanzada import sumar_multiples
+import tkinter as tk
 
-def mostrar_menu():
-    print("\n=== Calculadora Python ===")
-    print("1. Sumar dos números")
-    print("2. Restar dos números")
-    print("3. Multiplicar dos números")
-    print("4. Dividir dos números")
-    print("5. Sumar múltiples números")
-    print("6. Salir")
-    return input("Seleccione una opción: ")
+# Crear la ventana principal
+root = tk.Tk()
+root.title("Calculadora Personalizada")  # Título de la ventana
+root.geometry("400x500")  # Tamaño de la ventana (ancho x alto)
 
-def main():
-    while True:
-        opcion = mostrar_menu()
-        if opcion == "6":
-            print("¡Gracias por usar la calculadora!")
-            break
-            
-        if opcion in ["1", "2", "3", "4"]:
-            num1 = float(input("Ingrese el primer número: "))
-            num2 = float(input("Ingrese el segundo número: "))
-            
-            if opcion == "1":
-                print(f"Resultado: {sumar(num1, num2)}")
-            elif opcion == "2":
-                print(f"Resultado: {restar(num1, num2)}")
-            elif opcion == "3":
-                print(f"Resultado: {multiplicar(num1, num2)}")
-            elif opcion == "4":
-                try:
-                    print(f"Resultado: {dividir(num1, num2)}")
-                except ValueError as e:
-                    print(f"Error: {e}")
+# Pantalla para mostrar los números y resultados
+pantalla = tk.Entry(root, font=("Arial", 24), justify="right")
+pantalla.grid(row=0, column=0, columnspan=4, padx=10, pady=10, sticky="nsew")
+
+# Función para agregar números y operaciones a la pantalla
+def agregar_a_pantalla(valor):
+    pantalla.insert(tk.END, valor)
+
+# Función para limpiar la pantalla
+def limpiar_pantalla():
+    pantalla.delete(0, tk.END)
+
+# Función para calcular el resultado
+def calcular_resultado():
+    try:
+        resultado = str(eval(pantalla.get()))  # Evalúa la expresión en la pantalla
+        pantalla.delete(0, tk.END)
+        pantalla.insert(0, resultado)
+    except (SyntaxError, ZeroDivisionError, NameError) as error:
+        pantalla.delete(0, tk.END)
+        pantalla.insert(0, "Error")
+
+# Lista de botones
+BOTONES = [
+    '7', '8', '9', '/',
+    '4', '5', '6', '*',
+    '1', '2', '3', '-',
+    '0', '.', 'C', '+',
+    '=', '%'
+]
+
+# Posicionar los botones en la ventana
+FILA = 1
+COLUMNA = 0
+for boton in BOTONES:
+    if boton == '=':
+        tk.Button(root, text=boton, font=("Arial", 18), command=calcular_resultado).grid(row=FILA, column=COLUMNA, columnspan=2, sticky="nsew")
+        COLUMNA += 1
+    elif boton == 'C':
+        tk.Button(root, text=boton, font=("Arial", 18), command=limpiar_pantalla).grid(row=FILA, column=COLUMNA, sticky="nsew")
+    elif boton == '%':
+        tk.Button(root, text=boton, font=("Arial", 18), command=lambda: agregar_a_pantalla('/100')).grid(row=FILA, column=COLUMNA, sticky="nsew")
+    else:
+        tk.Button(root, text=boton, font=("Arial", 18), command=lambda b=boton: agregar_a_pantalla(b)).grid(row=FILA, column=COLUMNA, sticky="nsew")
+    
+    COLUMNA += 1
+    if COLUMNA > 3:
+        COLUMNA = 0
+        FILA += 1
         
-        elif opcion == "5":
-            numeros = []
-            while True:
-                num = input("Ingrese un número (o 'fin' para terminar): ")
-                if num.lower() == 'fin':
-                    break
-                numeros.append(float(num))
-            print(f"Resultado: {sumar_multiples(numeros)}")
-        else:
-            print("Opción no válida. Por favor, intente nuevamente.")
+# Configurar el layout para que los botones se expandan con la ventana
+for i in range(4):
+    root.grid_columnconfigure(i, weight=1)
+for i in range(6):
+    root.grid_rowconfigure(i, weight=1)
+    
+# Función para convertir Celsius a Fahrenheit
+def convertir_celsius_a_fahrenheit():
+    try:
+        celsius = float(pantalla.get())
+        fahrenheit = (celsius * 9/5) + 32
+        pantalla.delete(0, tk.END)
+        pantalla.insert(0, f"{fahrenheit:.2f} °F")
+    except ValueError as error:
+        pantalla.delete(0, tk.END)
+        pantalla.insert(0, "Error")
 
-if __name__ == "__main__":
-    main()
+# Botón para conversión de unidades
+tk.Button(root, text="°C to °F", font=("Arial", 18), command=convertir_celsius_a_fahrenheit).grid(row=6, column=0, columnspan=2, sticky="nsew")
 
-# sumar.py
-def sumar(a: float, b: float) -> float:
-    """
-    Suma dos números y retorna el resultado
-    """
-    return a + b
-
-# resta.py
-def restar(a: float, b: float) -> float:
-    """
-    Resta dos números y retorna el resultado
-    """
-    return a - b
-
-# multiplicacion.py
-def multiplicar(a: float, b: float) -> float:
-    """
-    Multiplica dos números y retorna el resultado
-    """
-    return a * b
-
-# dividir.py
-def dividir(a: float, b: float) -> float:
-    """
-    Divide dos números y retorna el resultado
-    Lanza una excepción si se intenta dividir por cero
-    """
-    if b == 0:
-        raise ValueError("No se puede dividir por cero")
-    return a / b
-
-# suma_avanzada.py
-def sumar_multiples(numeros: list) -> float:
-    """
-    Suma una lista de números y retorna el resultado
-    """
-    if not numeros:
-        return 0
-    return sum(numeros)
+# Iniciar la aplicación
+root.mainloop()
